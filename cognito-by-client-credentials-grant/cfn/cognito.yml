@@ -1,0 +1,54 @@
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: client-credentials-grant-sample
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8       # 8桁以上
+          RequireUppercase: true # 大文字必須
+          RequireLowercase: true # 小文字必須
+          RequireNumbers: true   # 数字必須
+          RequireSymbols: true   # 特殊文字必須
+      MfaConfiguration: OFF
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: client-credentials-grant-sample-appclient
+      GenerateSecret: true
+      RefreshTokenValidity: 30
+      UserPoolId: !Ref UserPool
+      AllowedOAuthFlows:
+        - client_credentials
+      AllowedOAuthScopes:
+        - !Join ['/', [!Ref UserPoolResourceServer, users.read]]
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AllowedOAuthFlowsUserPoolClient: true
+    DependsOn: UserPoolResourceServer
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: client-credentials-grant-sample-domain
+      UserPoolId: !Ref UserPool
+  UserPoolResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: client-credentials-grant-sample-resource-server
+      Name: client-credentials-grant-sample-resource-server
+      Scopes:
+        - ScopeDescription: Read Users Of DynamoDB
+          ScopeName: users.read
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPool:
+    Value: !Ref UserPool
+  UserPoolClient:
+    Value: !Ref UserPoolClient
+  UserPoolDomain:
+    Value: !Ref UserPoolDomain
+  UserPoolResourceServer:
+    Value: !Ref UserPoolResourceServer

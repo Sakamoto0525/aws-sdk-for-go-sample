@@ -1,0 +1,32 @@
+service: cognito-by-ccg
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-northeast-1
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  hello:
+    handler: bin/hello
+    events:
+      - http:
+          path: /hello
+          method: get
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayWithAuthorizationAuthorizer
+            scopes:
+              - client-credentials-grant-sample-resource-server/users.read
+
+resources:
+  ## Cognito
+  - ${file(./cfn/cognito.yml)}
+  ## API Gateway Authorizer
+  - ${file(./cfn/api_gateway_authorizer.yml)}
