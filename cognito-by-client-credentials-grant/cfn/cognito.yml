@@ -1,8 +1,6 @@
 Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
     Properties:
       UserPoolName: client-credentials-grant-sample
       Policies:
